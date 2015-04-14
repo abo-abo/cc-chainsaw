@@ -39,7 +39,7 @@
   "Return the class start position."
   (interactive)
   (save-excursion
-    (if (re-search-backward "\\bclass\\b[^;]+{" nil t)
+    (if (re-search-backward "\\b\\(?:class\\|struct\\)\\b[^;]+{" nil t)
         (point))))
 
 (defun ccc-get-function-name ()
