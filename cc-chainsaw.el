@@ -73,7 +73,7 @@ The point needs to be on the function name line."
 
 (defun ccc-get-function-template ()
   "Return the template part of the current function."
-  (and (looking-back "template <[^;{}]*")
+  (and (looking-back "template <[^;{}]*" nil)
        (save-excursion
          (let ((beg
                 (progn
@@ -192,16 +192,16 @@ Suitable for use in a snippet."
 (defun ccc-insert-endl ()
   "Insert std::endl with appropriate << and whitespace."
   (interactive)
-  (cond ((looking-back "<<\\(\\s-*\\)")
+  (cond ((looking-back "<<\\(\\s-*\\)" nil)
          (delete-region
           (match-beginning 1)
           (match-end 1))
          (insert " std::endl"))
 
-        ((looking-back "<<[ \t\n]+")
+        ((looking-back "<<[ \t\n]+" nil)
          (insert "std::endl"))
         (t
-         (and (looking-back "[^ \t]\\(\\s-+\\)")
+         (and (looking-back "[^ \t]\\(\\s-+\\)" nil)
               (delete-region
                (match-beginning 1)
                (match-end 1)))
@@ -266,7 +266,7 @@ The search is performed backwards through code.")
   "Insert a dot or an object name plus dot when appropriate."
   (interactive)
   (let (var-name)
-    (if (and (looking-back "^[ \t]*")
+    (if (and (looking-back "^[ \t]*" nil)
              (setq var-name (ccc-get-recent-var)))
         (insert var-name ".")
       (insert "."))))
