@@ -249,12 +249,14 @@ Suitable for use in a snippet."
                 ,(format
                   " \\(%s\\)\\.%s.*\n[\t ]*"
                   ccc-var-regex
-                  ccc-var-regex))
+                  ccc-var-regex)
+                nil)
                ;; variable constructor init
                (looking-back
                 ,(format
                   "[\t ]+\\(%s\\)\\(?:([^)]*)\\)?;[\t\n ]*"
-                  ccc-var-regex))
+                  ccc-var-regex)
+                nil)
                ;; variable dot, first on line
                (re-search-backward
                 ,(format "^[ \t]*\\(%s\\)\\." ccc-var-regex) nil t))
