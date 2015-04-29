@@ -286,14 +286,15 @@ The search is performed backwards through code.")
   (let* ((n-buffer (buffer-file-name))
          (n-file (file-name-nondirectory n-buffer))
          (n-target (file-name-sans-extension n-file))
-         (n-makefile (concat (file-name-directory n-buffer) "Makefile")))
+         (n-makefile (concat (file-name-directory n-buffer) "Makefile"))
+         (cmd ccc-compile-cmd))
     (if (file-exists-p n-makefile)
         (when (called-interactively-p 'any)
           (message "Makefile already exists"))
       (with-current-buffer (find-file-noselect n-makefile)
         (insert
          (concat n-target ": " n-file
-                 (format "\n\t%s -o $@ $^" ccc-compile-cmd)
+                 (format "\n\t%s -o $@ $^" cmd)
                  "\n\nclean: \n\trm -f " n-target
                  "\n\nrun: " n-target "\n\t ./" n-target
                  "\n\n.PHONY: clean run\n"))
