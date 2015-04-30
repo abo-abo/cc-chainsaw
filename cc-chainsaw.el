@@ -477,6 +477,18 @@ Both need to be in a single file."
         (backward-char 2)
       (user-error "Couldn't jump to %s" s2))))
 
+(defun ccc-electric-del (&optional arg)
+  "Delete backwards one char and some whitespace."
+  (interactive "p")
+  (dotimes (_i arg)
+    (if (looking-back "\n +")
+        (progn
+          (delete-region
+           (match-beginning 0)
+           (match-end 0))
+          (indent-for-tab-command))
+      (delete-char -1))))
+
 (provide 'cc-chainsaw)
 
 ;;; cc-chainsaw.el ends here
