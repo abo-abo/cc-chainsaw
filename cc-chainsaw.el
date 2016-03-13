@@ -426,27 +426,29 @@ BEG and END are the bounds of the arumetns list."
        (list (region-beginning) (region-end))
      (save-excursion
        (let (end)
-         (up-list)
+         (ignore-errors (up-list))
          (setq end (point))
-         (backward-list)
+         (ignore-errors (backward-list))
          (list (point) end)))))
-  (let ((lines (ccc-selected-lines beg end)))
-    (if (not (string-match "^("
-                           (buffer-substring-no-properties beg end)))
-        (ccc-align-declarations)
-      (if (> (length lines) 1)
-          (let* ((pts-begin (mapcar #'car lines))
-                 (pts-arg-rel (mapcar (lambda (x)
-                                        (caar
-                                         (ccc-extract-argument-positions
-                                          (cdr x))))
-                                      lines))
-                 (pt-arg-max (apply #'max pts-arg-rel)))
-            (cl-mapcar (lambda (b x)
-                         (goto-char (+ b x))
-                         (insert (make-string (- pt-arg-max x) ?\ )))
-                       pts-begin
-                       pts-arg-rel))))))
+  (if (or (bolp) (lispy--in-comment-p))
+      (fill-paragraph)
+    (let ((lines (ccc-selected-lines beg end)))
+      (if (not (string-match "^("
+                             (buffer-substring-no-properties beg end)))
+          (ccc-align-declarations)
+        (if (> (length lines) 1)
+            (let* ((pts-begin (mapcar #'car lines))
+                   (pts-arg-rel (mapcar (lambda (x)
+                                          (caar
+                                           (ccc-extract-argument-positions
+                                            (cdr x))))
+                                        lines))
+                   (pt-arg-max (apply #'max pts-arg-rel)))
+              (cl-mapcar (lambda (b x)
+                           (goto-char (+ b x))
+                           (insert (make-string (- pt-arg-max x) ?\ )))
+                         pts-begin
+                         pts-arg-rel)))))))
 
 (defun ccc-align-declarations ()
   "Align C++ declarations at point."
