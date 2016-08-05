@@ -223,7 +223,10 @@ Suitable for use in a snippet."
               end (region-end))
       (setq beg (point-min)
             end (point-max)))
-    (shell-command-on-region beg end "astyle -A3 -U -p -k3" nil t)))
+    (shell-command-on-region
+     beg end
+     "astyle --style=otbs --indent=spaces=2 -U --pad-oper --pad-paren-out --add-brackets -k3"
+     nil t)))
 
 (defun ccc-wrap-in-comment (beg end)
   "Wrap the region between BEG and END in C-style comment."
@@ -483,7 +486,7 @@ Both need to be in a single file."
   "Delete backwards one char and some whitespace."
   (interactive "p")
   (dotimes (_i arg)
-    (if (looking-back "\n +")
+    (if (looking-back "\n +" (line-beginning-position))
         (progn
           (delete-region
            (match-beginning 0)
