@@ -333,7 +333,8 @@ The search is performed backwards through code.")
 
     (compile (if makefilep
                  "make -j8 run"
-               "cd build && make -j8 run"))))
+               "cd build && make -j8 run")
+             t)))
 
 ;;* Access modifers
 (defun ccc-ensure (modifier)
