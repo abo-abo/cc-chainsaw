@@ -225,7 +225,7 @@ Suitable for use in a snippet."
             end (point-max)))
     (shell-command-on-region
      beg end
-     "astyle --style=otbs --indent=spaces=2 -U --pad-oper --pad-paren-out --add-brackets -k3"
+     "astyle --style=java --indent=spaces=2 -U --pad-oper --pad-paren-out --add-brackets -k3"
      nil t)))
 
 (defun ccc-wrap-in-comment (beg end)
