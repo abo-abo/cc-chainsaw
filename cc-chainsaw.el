@@ -284,9 +284,10 @@ The search is performed backwards through code.")
   "Parameters to export before calling cmake.")
 
 (defun ccc-generate-makefile ()
-  "Generate a Makefile for the current simple C++ project."
+  "Generate a Makefile for the current simple C/C++/Java project."
   (interactive)
   (let* ((n-buffer (buffer-file-name))
+         (n-major-mode major-mode)
          (n-file (file-name-nondirectory n-buffer))
          (n-target (file-name-sans-extension n-file))
          (n-makefile (concat (file-name-directory n-buffer) "Makefile"))
@@ -296,16 +297,22 @@ The search is performed backwards through code.")
           (message "Makefile already exists"))
       (with-current-buffer (find-file-noselect n-makefile)
         (insert
-         (concat n-target ": " n-file
-                 (format "\n\t%s -o $@ $^" cmd)
-                 "\n\nclean: \n\trm -f " n-target
-                 "\n\nrun: " n-target "\n\t ./" n-target
-                 "\n\n.PHONY: clean run\n"))
+         (if (eq n-major-mode 'java-mode)
+             (concat
+              (format "run: all\n\tjava -cp . %s\n\n" n-target)
+              (format "all: %s.class\n\n" n-target)
+              "%.class: %.java\n\tjavac -g $^\n\n"
+              "clean:\n\trm *.class\n")
+           (concat n-target ": " n-file
+                   (format "\n\t%s -o $@ $^" cmd)
+                   "\n\nclean: \n\trm -f " n-target
+                   "\n\nrun: " n-target "\n\t ./" n-target
+                   "\n\n.PHONY: clean run\n")))
         (save-buffer)))))
 
-(defun ccc-run ()
-  "Compile and run the current simple C++ project."
-  (interactive)
+(defun ccc-run (&optional arg)
+  "Compile and run the current simple C/C++/Java project."
+  (interactive "P")
   (save-buffer)
   (let* ((n-buffer (buffer-file-name))
          (makefilep (file-exists-p
@@ -334,7 +341,7 @@ The search is performed backwards through code.")
     (compile (if makefilep
                  "make -j8 run"
                "cd build && make -j8 run")
-             t)))
+             arg)))
 
 ;;* Access modifers
 (defun ccc-ensure (modifier)
