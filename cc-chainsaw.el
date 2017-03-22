@@ -283,6 +283,14 @@ The search is performed backwards through code.")
 (defcustom ccc-cmake-export-cmd "export COW_SAYS=MOO &&"
   "Parameters to export before calling cmake.")
 
+(defun ccc-detect-libs ()
+  (let (libs)
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "boost/test/unit_test.hpp" nil t)
+        (push "-lboost_unit_test_framework" libs)))
+    (mapconcat #'identity libs " ")))
+
 (defun ccc-generate-makefile ()
   "Generate a Makefile for the current simple C/C++/Java project."
   (interactive)
@@ -291,6 +299,7 @@ The search is performed backwards through code.")
          (n-file (file-name-nondirectory n-buffer))
          (n-target (file-name-sans-extension n-file))
          (n-makefile (concat (file-name-directory n-buffer) "Makefile"))
+         (n-libs (ccc-detect-libs))
          (cmd ccc-compile-cmd))
     (if (file-exists-p n-makefile)
         (when (called-interactively-p 'any)
@@ -304,7 +313,7 @@ The search is performed backwards through code.")
               "%.class: %.java\n\tjavac -g $^\n\n"
               "clean:\n\trm *.class\n")
            (concat n-target ": " n-file
-                   (format "\n\t%s -o $@ $^" cmd)
+                   (format "\n\t%s -o $@ $^ %s" cmd n-libs)
                    "\n\nclean: \n\trm -f " n-target
                    "\n\nrun: " n-target "\n\t ./" n-target
                    "\n\n.PHONY: clean run\n")))
