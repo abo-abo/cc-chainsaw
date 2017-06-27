@@ -514,6 +514,30 @@ Both need to be in a single file."
           (indent-for-tab-command))
       (delete-char -1))))
 
+(defun ccc-toggle-header-source ()
+  (interactive)
+  (let* ((fname (file-name-nondirectory (buffer-file-name)))
+         (name (file-name-sans-extension fname))
+         (cur-ext (file-name-extension fname))
+         (new-ext (if (string= cur-ext "h")
+                      "cpp"
+                    "h"))
+         (new-fname (concat name "." new-ext))
+         files)
+    (let ((default-directory (locate-dominating-file default-directory ".git")))
+      (setq files
+            (mapcar #'expand-file-name
+                    (split-string
+                     (shell-command-to-string
+                      (format "git ls-files *%s" new-fname)) "\n" t))))
+    (cl-case (length files)
+      (0
+       (error "%s not found in project" new-fname))
+      (1
+       (find-file (car files)))
+      (t
+       (error "more than one %s in project: %S" new-fname files)))))
+
 (provide 'cc-chainsaw)
 
 ;;; cc-chainsaw.el ends here
