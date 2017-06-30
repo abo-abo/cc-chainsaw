@@ -514,8 +514,8 @@ Both need to be in a single file."
           (indent-for-tab-command))
       (delete-char -1))))
 
-(defun ccc-toggle-header-source ()
-  (interactive)
+(defun ccc-toggle-header-source (&optional arg)
+  (interactive "P")
   (let* ((fname (file-name-nondirectory (buffer-file-name)))
          (name (file-name-sans-extension fname))
          (cur-ext (file-name-extension fname))
@@ -534,7 +534,9 @@ Both need to be in a single file."
       (0
        (error "%s not found in project" new-fname))
       (1
-       (find-file (car files)))
+       (if arg
+           (find-file-other-window (car files))
+         (find-file (car files))))
       (t
        (error "more than one %s in project: %S" new-fname files)))))
 
