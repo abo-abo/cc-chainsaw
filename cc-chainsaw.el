@@ -529,7 +529,7 @@ Both need to be in a single file."
             (mapcar #'expand-file-name
                     (split-string
                      (shell-command-to-string
-                      (format "git ls-files *%s" new-fname)) "\n" t))))
+                      (format "git ls-files */%s" new-fname)) "\n" t))))
     (cl-case (length files)
       (0
        (error "%s not found in project" new-fname))
