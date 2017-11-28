@@ -283,13 +283,20 @@ The search is performed backwards through code.")
 (defcustom ccc-cmake-export-cmd "export COW_SAYS=MOO &&"
   "Parameters to export before calling cmake.")
 
-(defun ccc-detect-libs ()
-  (let (libs)
+(defun ccc-detect-lib (regex-lib)
+  (let ((regex (car regex-lib)))
     (save-excursion
-      (goto-char (point-min))
-      (when (re-search-forward "boost/test/unit_test.hpp" nil t)
-        (push "-lboost_unit_test_framework" libs)))
-    (mapconcat #'identity libs " ")))
+     (goto-char (point-min))
+     (when (re-search-forward regex nil t)
+       (list (cdr regex-lib))))))
+
+(defun ccc-detect-libs ()
+  (mapconcat #'identity
+             (cl-mapcan
+              #'ccc-detect-lib
+              '(("<thread>" . "-pthread")
+                ("boost/test/unit_test.hpp" . "-lboost_unit_test_framework")))
+             " "))
 
 (defun ccc-generate-makefile ()
   "Generate a Makefile for the current simple C/C++/Java project."
@@ -358,7 +365,9 @@ The search is performed backwards through code.")
 ;;* Access modifers
 (defun ccc-ensure (modifier)
   "Ensure that the current point is under MODIFIER access."
-  (let ((class-beg (ccc-class-beginning-position)))
+  (let ((class-beg (save-excursion
+                     (goto-char (ccc-class-beginning-position))
+                     (line-beginning-position 2))))
     (if (null class-beg)
         (user-error "Not in a class")
       (let ((access
