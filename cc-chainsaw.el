@@ -547,7 +547,8 @@ Both need to be in a single file."
            (find-file-other-window (car files))
          (find-file (car files))))
       (t
-       (error "more than one %s in project: %S" new-fname files)))))
+       (ivy-read "file: " files
+                 :action 'find-file)))))
 
 (provide 'cc-chainsaw)
 
