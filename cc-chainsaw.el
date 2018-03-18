@@ -281,7 +281,8 @@ The search is performed backwards through code.")
   "The command to compile C++ source.")
 
 (defcustom ccc-cmake-export-cmd "export COW_SAYS=MOO &&"
-  "Parameters to export before calling cmake.")
+  "Parameters to export before calling cmake."
+  :type 'string)
 
 (defun ccc-detect-lib (regex-lib)
   (let ((regex (car regex-lib)))
@@ -506,7 +507,7 @@ Both need to be in a single file."
          (s2 (and (string-match "[^(]+(" s1)
                   (match-string 0 s1)))
          (s3 (and s2 (replace-regexp-in-string "[\n \t]+" "[\n \t]*" s2))))
-    (ring-insert find-tag-marker-ring (point-marker))
+    (with-no-warnings (ring-insert find-tag-marker-ring (point-marker)))
     (if (and s3 (re-search-forward s3 nil t))
         (backward-char 2)
       (user-error "Couldn't jump to %s" s2))))
