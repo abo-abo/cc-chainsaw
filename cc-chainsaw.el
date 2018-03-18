@@ -330,13 +330,40 @@ The search is performed backwards through code.")
                    "\n\n.PHONY: clean run\n")))
         (save-buffer)))))
 
+(defun ccc-generate-cookbook ()
+  "Generate Cookbook.py for the current simple C/C++ project."
+  (interactive)
+  (let* ((n-buffer (buffer-file-name))
+         (n-file (file-name-nondirectory n-buffer))
+         (n-cookbook
+          (expand-file-name "Cookbook.py")))
+    (if (file-exists-p n-cookbook)
+        (when (called-interactively-p 'any)
+          (message "Cookbook.py already exists"))
+      (with-current-buffer (find-file-noselect n-cookbook)
+        (insert
+         (format
+          "#* Imports
+import pycook.recipes.cpp as cpp
+import pycook.elisp as el
+lf = el.lf
+
+#* Recipes
+def run(recipe):
+    return cpp.compile_and_run([\"%s\"])
+
+" n-file))
+        (save-buffer)))))
+
 (defun ccc-run (&optional arg)
   "Compile and run the current simple C/C++/Java project."
   (interactive "P")
   (save-buffer)
   (let* ((n-buffer (buffer-file-name))
-         (makefilep (file-exists-p
-                     (concat (file-name-directory n-buffer) "Makefile")))
+         (cookbookp (or (file-exists-p "Cookbook.py")
+                        (ignore-errors
+                          (cook-current-cookbook))))
+         (makefilep (file-exists-p "Makefile"))
          (cmakelistsp (file-exists-p
                        (concat (file-name-directory n-buffer) "CMakeLists.txt")))
          (builddir (concat (file-name-directory n-buffer) "build/"))
@@ -346,10 +373,13 @@ The search is performed backwards through code.")
     (cond
       (makefilep)
       (out-makefilep)
+      (cookbookp)
 
       ((not cmakelistsp)
-       (ccc-generate-makefile)
-       (setq makefilep t))
+       ;; (ccc-generate-makefile)
+       ;; (setq makefilep t)
+       (ccc-generate-cookbook)
+       (setq cookbookp t))
 
       (builddirp
        (shell-command
@@ -358,9 +388,12 @@ The search is performed backwards through code.")
       (t
        (async-shell-command "cmake .")))
 
-    (compile (if makefilep
-                 "make -j8 run"
-               "cd build && make -j8 run")
+    (compile (cond (makefilep
+                    "make -j8 run")
+                   (cookbookp
+                    "cook run")
+                   (t
+                    "cd build && make -j8 run"))
              arg)))
 
 ;;* Access modifers
