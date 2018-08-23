@@ -402,37 +402,41 @@ def run(recipe):
   (let ((class-beg (save-excursion
                      (goto-char (ccc-class-beginning-position))
                      (line-beginning-position 2))))
-    (if (null class-beg)
-        (user-error "Not in a class")
-      (let ((access
-             (save-excursion
-               (if (re-search-backward
-                    "\\(\\(?:public:\\)\\|\\(?:private:\\)\\|\\(?:protected:\\)\\)"
-                    class-beg t)
-                   (match-string-no-properties 1)
-                 "private:"))))
-        (unless (equal access modifier)
-          (save-excursion
-            (let ((prev-thing
-                   (save-excursion
-                     (back-to-indentation)
-                     (when (re-search-backward ":\\|;\\|}" class-beg t)
-                       (1+ (point))))))
-              (if prev-thing
-                  (progn
-                    (goto-char prev-thing)
-                    (insert "\n" modifier)
-                    (indent-region prev-thing (point)))
-                (progn
-                  (forward-line -1)
-                  (if (save-excursion
-                        (beginning-of-line)
-                        (looking-at "[ \t]*$"))
-                      (insert modifier)
-                    (progn
-                      (end-of-line)
-                      (insert "\n" modifier)))
-                  (c-indent-line-or-region))))))))))
+    (cond ((null class-beg)
+           (user-error "Not in a class"))
+          ((save-excursion
+             (goto-char (ccc-class-beginning-position))
+             (looking-at "struct")))
+          (t
+           (let ((access
+                  (save-excursion
+                    (if (re-search-backward
+                         "\\(\\(?:public:\\)\\|\\(?:private:\\)\\|\\(?:protected:\\)\\)"
+                         class-beg t)
+                        (match-string-no-properties 1)
+                      "private:"))))
+             (unless (equal access modifier)
+               (save-excursion
+                 (let ((prev-thing
+                        (save-excursion
+                          (back-to-indentation)
+                          (when (re-search-backward ":\\|;\\|}" class-beg t)
+                            (1+ (point))))))
+                   (if prev-thing
+                       (progn
+                         (goto-char prev-thing)
+                         (insert "\n" modifier)
+                         (indent-region prev-thing (point)))
+                     (progn
+                       (forward-line -1)
+                       (if (save-excursion
+                             (beginning-of-line)
+                             (looking-at "[ \t]*$"))
+                           (insert modifier)
+                         (progn
+                           (end-of-line)
+                           (insert "\n" modifier)))
+                       (c-indent-line-or-region)))))))))))
 
 (defun ccc-ensure-public ()
   "Ensure public access."
