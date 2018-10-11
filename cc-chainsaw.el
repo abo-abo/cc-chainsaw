@@ -340,10 +340,9 @@ The search is performed backwards through code.")
     (if (file-exists-p n-cookbook)
         (when (called-interactively-p 'any)
           (message "Cookbook.py already exists"))
-      (with-current-buffer (find-file-noselect n-cookbook)
-        (insert
-         (format
-          "#* Imports
+      (let ((txt (format
+                  (if (eq major-mode 'c++-mode)
+                      "#* Imports
 import pycook.recipes.cpp as cpp
 import pycook.elisp as el
 lf = el.lf
@@ -352,8 +351,18 @@ lf = el.lf
 def run(recipe):
     return cpp.compile_and_run([\"%s\"])
 
-" n-file))
-        (save-buffer)))))
+"
+                    "
+#* Imports
+import pycook.recipes.rust as rust
+
+#* Recipes
+def run(recipe):
+    return rust.compile_and_run([\"%s\"])
+") n-file)))
+        (with-current-buffer (find-file-noselect n-cookbook)
+          (insert txt)
+          (save-buffer))))))
 
 (defun ccc-run (&optional arg)
   "Compile and run the current simple C/C++/Java project."
