@@ -597,6 +597,14 @@ Both need to be in a single file."
        (ivy-read "file: " files
                  :action 'find-file)))))
 
+(defun ccc-boost-test-name ()
+  "Used in a snippet."
+  (replace-regexp-in-string
+   "[.-]" "_"
+   (file-name-sans-extension
+    (file-name-nondirectory
+     (buffer-file-name)))))
+
 (provide 'cc-chainsaw)
 
 ;;; cc-chainsaw.el ends here
