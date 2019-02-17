@@ -605,6 +605,14 @@ Both need to be in a single file."
     (file-name-nondirectory
      (buffer-file-name)))))
 
+(defun ccc-magic-tab ()
+  (interactive)
+  (if (looking-at "#ifn?def")
+      (if (get-char-property (line-end-position) 'invisible)
+          (show-ifdef-block)
+        (hide-ifdef-block))
+    (call-interactively 'c-indent-line-or-region)))
+
 (provide 'cc-chainsaw)
 
 ;;; cc-chainsaw.el ends here
